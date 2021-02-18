@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2097c20c8633dd96f0d4e7c89d0dd9c903dbf0e7e8d4710b5440db8b32a0ad5e
+-- hash: efc47b5d2ec399e4c17f582e60966257efd702e076e19e4bb927e3ac773fe886
 
 name:           ticktick-to-org
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       Convert
+      Item
   other-modules:
       Paths_ticktick_to_org
   hs-source-dirs:
@@ -40,6 +41,7 @@ library
     , pandoc-types
     , split
     , time
+    , unordered-containers
     , vector
   default-language: Haskell2010
 
@@ -59,6 +61,7 @@ executable ticktick-to-org-exe
     , split
     , ticktick-to-org
     , time
+    , unordered-containers
     , vector
   default-language: Haskell2010
 
@@ -74,10 +77,12 @@ test-suite ticktick-to-org-test
       base >=4.7 && <5
     , bytestring
     , cassava
+    , hspec
     , pandoc
     , pandoc-types
     , split
     , ticktick-to-org
     , time
+    , unordered-containers
     , vector
   default-language: Haskell2010

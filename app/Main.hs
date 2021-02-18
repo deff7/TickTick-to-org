@@ -4,6 +4,7 @@ import qualified Data.ByteString.Lazy.Char8 as BS
 import Data.Csv
 import qualified Data.Vector as V
 
+import Item
 import Convert
 
 main :: IO ()
@@ -13,4 +14,4 @@ main = do
   BS.putStrLn input
   case decodeByName input :: Either String (Header, V.Vector Item) of
     Left e -> print e
-    Right (_, items) -> print $ V.map ((,) <$> unDueDate <*> unTaskID) items
+    Right (_, items) -> print $ itemsToTree items
