@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: efc47b5d2ec399e4c17f582e60966257efd702e076e19e4bb927e3ac773fe886
+-- hash: 0a8957b4275f23d18c63f6f180140fbff0504db216ba03cd359aed28e34ef2c6
 
 name:           ticktick-to-org
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       Convert
+      Display
       Item
   other-modules:
       Paths_ticktick_to_org
@@ -37,9 +38,11 @@ library
       base >=4.7 && <5
     , bytestring
     , cassava
+    , containers
     , pandoc
     , pandoc-types
     , split
+    , text
     , time
     , unordered-containers
     , vector
@@ -56,9 +59,11 @@ executable ticktick-to-org-exe
       base >=4.7 && <5
     , bytestring
     , cassava
+    , containers
     , pandoc
     , pandoc-types
     , split
+    , text
     , ticktick-to-org
     , time
     , unordered-containers
@@ -77,10 +82,12 @@ test-suite ticktick-to-org-test
       base >=4.7 && <5
     , bytestring
     , cassava
+    , containers
     , hspec
     , pandoc
     , pandoc-types
     , split
+    , text
     , ticktick-to-org
     , time
     , unordered-containers

@@ -1,0 +1,7 @@
+#+TITLE: Example
+* Inbox
+** Sub-folder
+*** TODO Item 1
+Content
+*** TODO Item 2
+*** DONE Item 3
