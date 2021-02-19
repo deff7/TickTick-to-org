@@ -32,6 +32,10 @@ dependencies:
 - containers
 - text
 
+extra-deps:
+  - pandoc-2.11.4
+
+
 library:
   source-dirs: src
 

@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Convert where
 
 import Text.Pandoc
@@ -36,10 +38,20 @@ itemsToTree :: V.Vector Item -> Node
 itemsToTree items = V.foldl (\n it -> insertItem n it (itemPath it)) (Node 0 "*" M.empty) items
 
 treeToPandoc :: Node -> Pandoc
-treeToPandoc root = doc $ go root
+treeToPandoc root = setTitle "Root" $ doc $ go root
   where
     go :: Node -> Blocks
-    go (Leaf lvl it) = header lvl (text $ T.pack $ unTitle it)
-    go (Node lvl title hm) = header lvl (text $ T.pack title) <> next
+    go (Leaf lvl it) = header lvl (text $ T.pack $ trimSpace $ unTitle it)
+    go (Node lvl title hm) = hdr <> next
       where
+        hdr =
+          if lvl > 0
+          then header lvl (text $ T.pack title)
+          else mempty
         next = foldl1 (<>) (map go (M.elems hm))
+
+debug :: Pandoc
+debug = doc $
+  header 1 (spanWith ("", [], []) (text "Test")) <>
+  header 1 (spanWith ("", [], []) (text "Test")) <>
+  header 1 (spanWith ("", [], []) (text "Test"))
