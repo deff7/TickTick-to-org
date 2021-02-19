@@ -21,8 +21,6 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
-- pandoc
-- pandoc-types
 - cassava
 - time
 - bytestring
@@ -31,10 +29,9 @@ dependencies:
 - unordered-containers
 - containers
 - text
-
-extra-deps:
-  - pandoc-2.11.4
-
+- pandoc
+- pandoc-types
+- sort
 
 library:
   source-dirs: src

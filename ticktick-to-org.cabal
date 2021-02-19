@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0a8957b4275f23d18c63f6f180140fbff0504db216ba03cd359aed28e34ef2c6
+-- hash: 20514cdfee4bd59527117f0f65664ffbfdedff4a800e9f4d710eb345dd79fefa
 
 name:           ticktick-to-org
 version:        0.1.0.0
@@ -41,6 +41,7 @@ library
     , containers
     , pandoc
     , pandoc-types
+    , sort
     , split
     , text
     , time
@@ -62,6 +63,7 @@ executable ticktick-to-org-exe
     , containers
     , pandoc
     , pandoc-types
+    , sort
     , split
     , text
     , ticktick-to-org
@@ -86,6 +88,7 @@ test-suite ticktick-to-org-test
     , hspec
     , pandoc
     , pandoc-types
+    , sort
     , split
     , text
     , ticktick-to-org

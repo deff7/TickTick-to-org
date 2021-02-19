@@ -13,7 +13,7 @@ import qualified Data.ByteString.Char8 as BS
 data Status = Normal
             | Completed
             | Archived
-            deriving Show
+            deriving (Show, Eq, Ord)
 
 data Item = Item { unFolderName :: Maybe String
                  , unListName :: String
@@ -28,7 +28,15 @@ data Item = Item { unFolderName :: Maybe String
                  , unColumnName :: Maybe String
                  , unTaskID :: String
                  , unChildTasks :: [Item]
+                 , unStatus :: Status
                  } deriving (Show, Eq)
+
+instance FromField Status where
+  parseField s
+    | s == "0" = pure Normal
+    | s == "1" = pure Completed
+    | s == "2" = pure Archived
+    | otherwise = mzero
 
 instance FromField UTCTime where
   -- 2021-02-10T21:00:00+0000
@@ -49,7 +57,8 @@ instance FromNamedRecord Item where
       m .: "Repeat" <*>
       m .: "Column Name" <*>
       m .: "taskId" <*>
-      pure []
+      pure [] <*>
+      m .: "Status"
 
 trimSpace :: String -> String
 trimSpace = f . f

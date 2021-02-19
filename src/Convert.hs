@@ -5,9 +5,11 @@ module Convert where
 import Text.Pandoc
 import Text.Pandoc.Builder
 import qualified Data.Text as T
-import qualified Data.Vector as V
 import qualified Data.HashMap.Strict as M
 import qualified Data.Sequence as S
+import qualified Data.Vector as V
+import Data.Sort (sortBy)
+import Data.Function (on)
 
 import Item
 
@@ -35,20 +37,28 @@ insertItem (Node lvl name hm) it (x:xs) = Node lvl name $ M.alter update x hm
     update Nothing = Just $ (insertItem (Node (lvl+1) x M.empty) it xs)
 
 itemsToTree :: V.Vector Item -> Node
-itemsToTree items = V.foldl (\n it -> insertItem n it (itemPath it)) (Node 0 "*" M.empty) items
+itemsToTree = V.foldl (\n it -> insertItem n it (itemPath it)) (Node 0 "*" M.empty)
 
 treeToPandoc :: Node -> Pandoc
 treeToPandoc root = setTitle "Root" $ doc $ go root
   where
     go :: Node -> Blocks
-    go (Leaf lvl it) = header lvl (text $ T.pack $ trimSpace $ unTitle it)
+    go (Leaf lvl it) = header lvl (spanWith attrs txt)
+      where
+        attrs = ("", if unStatus it == Normal then ["todo", "TODO"] else ["done", "DONE"], [])
+        prefix = if unStatus it == Normal then "TODO " else "DONE "
+        txt = text $ prefix <> (T.pack $ trimSpace $ unTitle it)
     go (Node lvl title hm) = hdr <> next
       where
         hdr =
           if lvl > 0
           then header lvl (text $ T.pack title)
           else mempty
-        next = foldl1 (<>) (map go (M.elems hm))
+        next = foldl1 (<>) (map go elems)
+        elems = sortBy f $ M.elems hm
+
+        f (Leaf _ a) (Leaf _ b) = (compare `on` unStatus) a b
+        f _ _ = EQ
 
 debug :: Pandoc
 debug = doc $
