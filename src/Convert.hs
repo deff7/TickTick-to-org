@@ -44,7 +44,11 @@ itemsToTree :: V.Vector Item -> Node
 itemsToTree = V.foldl (\n it -> insertItem n it (itemPath it)) (Node 0 "*" M.empty)
 
 convertContent :: String -> Blocks
-convertContent = mconcat . map (para . text . T.pack) . splitOn "\r"
+convertContent = mconcat . map (para . text . T.pack . convertLine) . splitOn "\r"
+  where
+    convertLine ('▫':xs) = "- [ ] " <> xs
+    convertLine ('▪':xs) = "- [X] " <> xs
+    convertLine s = s
 
 convertScheduled :: UTCTime -> String -> Blocks
 convertScheduled t rep = para . text . T.pack . formatTime defaultTimeLocale ("SCHEDULED: <%Y-%m-%d %a" <> rep <> ">") . utcToZonedTime tz $ t
