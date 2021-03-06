@@ -10,6 +10,7 @@ import qualified Data.Sequence as S
 import qualified Data.Vector as V
 import Data.Sort (sortBy)
 import Data.Function (on)
+import Data.List.Split (splitOn)
 
 import Item
 
@@ -39,15 +40,20 @@ insertItem (Node lvl name hm) it (x:xs) = Node lvl name $ M.alter update x hm
 itemsToTree :: V.Vector Item -> Node
 itemsToTree = V.foldl (\n it -> insertItem n it (itemPath it)) (Node 0 "*" M.empty)
 
+convertContent :: String -> Blocks
+convertContent = mconcat . map (para . text . T.pack) . splitOn "\r"
+
 treeToPandoc :: Node -> Pandoc
 treeToPandoc root = setTitle "Root" $ doc $ go root
   where
     go :: Node -> Blocks
-    go (Leaf lvl it) = header lvl (spanWith attrs txt)
+    go (Leaf lvl it) = header lvl (spanWith attrs txt) <> scheduled <> contents
       where
         attrs = ("", if unStatus it == Normal then ["todo", "TODO"] else ["done", "DONE"], [])
         prefix = if unStatus it == Normal then "TODO " else "DONE "
         txt = text $ prefix <> (T.pack $ trimSpace $ unTitle it)
+        scheduled = maybe mempty (\dt -> para $ str "SCHEDULED") (unDueDate it)
+        contents = convertContent $ unContent it
     go (Node lvl title hm) = hdr <> next
       where
         hdr =

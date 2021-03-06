@@ -19,7 +19,6 @@ import Display
 
 saveToOrg :: FilePath -> V.Vector Item -> IO ()
 saveToOrg f items = do
-  print $ treeToPandoc $ itemsToTree items
   txt <- runIOorExplode (writeOrg (def { writerWrapText = WrapNone }) $ treeToPandoc $ itemsToTree items)
   T.writeFile f txt
 
@@ -37,7 +36,6 @@ myDoc = Pandoc (Meta {unMeta = fromList [("title",
 
 main :: IO ()
 main = do
-  -- T.readFile "./test/data/example.org" >>= debug
   f <- BS.readFile "/home/deff/Downloads/TickTick-backup-2021-02-14.csv"
   runIOorExplode (writeOrg def myDoc) >>= T.writeFile "out2.org"
   let input = BS.unlines $ drop 6 $ BS.lines f
