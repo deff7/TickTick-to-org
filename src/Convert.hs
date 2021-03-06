@@ -8,6 +8,7 @@ import           Data.List.Split (splitOn)
 import qualified Data.Sequence as S
 import           Data.Sort (sortBy)
 import qualified Data.Text as T
+import           Data.Time (TimeZone (..), utcToZonedTime)
 import           Data.Time (UTCTime)
 import           Data.Time.Format (formatTime, defaultTimeLocale)
 import qualified Data.Vector as V
@@ -46,7 +47,10 @@ convertContent :: String -> Blocks
 convertContent = mconcat . map (para . text . T.pack) . splitOn "\r"
 
 convertScheduled :: UTCTime -> Blocks
-convertScheduled = para . text . T.pack . formatTime defaultTimeLocale "SCHEDULED: <%Y-%m-%d %a>"
+convertScheduled = para . text . T.pack . formatTime defaultTimeLocale "SCHEDULED: <%Y-%m-%d %a>" . utcToZonedTime tz
+  where
+    -- TODO: determine local time zone
+    tz = TimeZone 180 False "MSK"
 
 treeToPandoc :: Node -> Pandoc
 treeToPandoc root = setTitle "Root" $ doc $ go root
