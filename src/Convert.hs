@@ -46,11 +46,21 @@ itemsToTree = V.foldl (\n it -> insertItem n it (itemPath it)) (Node 0 "*" M.emp
 convertContent :: String -> Blocks
 convertContent = mconcat . map (para . text . T.pack) . splitOn "\r"
 
-convertScheduled :: UTCTime -> Blocks
-convertScheduled = para . text . T.pack . formatTime defaultTimeLocale "SCHEDULED: <%Y-%m-%d %a>" . utcToZonedTime tz
+convertScheduled :: UTCTime -> String -> Blocks
+convertScheduled t rep = para . text . T.pack . formatTime defaultTimeLocale ("SCHEDULED: <%Y-%m-%d %a" <> rep <> ">") . utcToZonedTime tz $ t
   where
     -- TODO: determine local time zone
     tz = TimeZone 180 False "MSK"
+
+convertRepeat :: String -> String
+convertRepeat "" = ""
+convertRepeat s = " +" <> (kv M.! "INTERVAL") <> (freq $ kv M.! "FREQ")
+  where
+    kv = M.fromList . map (toTuple . splitOn "=") . splitOn ";" $ s
+    toTuple [a, b] = (a, b)
+    freq "MONTHLY" = "m"
+    freq "WEEKLY" = "w"
+    freq "DAILY" = "d"
 
 treeToPandoc :: Node -> Pandoc
 treeToPandoc root = setTitle "Root" $ doc $ go root
@@ -61,7 +71,7 @@ treeToPandoc root = setTitle "Root" $ doc $ go root
         attrs = ("", if unStatus it == Normal then ["todo", "TODO"] else ["done", "DONE"], [])
         prefix = if unStatus it == Normal then "TODO " else "DONE "
         txt = text $ prefix <> (T.pack $ trimSpace $ unTitle it)
-        scheduled = maybe mempty convertScheduled (unDueDate it)
+        scheduled = maybe mempty (\t -> convertScheduled t (convertRepeat $ unRepeat it)) (unDueDate it)
         contents = convertContent $ unContent it
     go (Node lvl title hm) = hdr <> next
       where

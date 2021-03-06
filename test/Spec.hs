@@ -28,6 +28,13 @@ emptyItem = Item { unFolderName = Nothing
 
 main :: IO ()
 main = hspec $ do
+  describe "Convert.convertRepeat" $ do
+    let cases = [("FREQ=MONTHLY;INTERVAL=2", " +2m"),
+                 ("INTERVAL=1;FREQ=DAILY", " +1d"),
+                 ("FREQ=WEEKLY;WKST=MO;INTERVAL=1;BYDAY=SU", " +1w")]
+    let testCase (i, o) = it (i <> " --> " <> o) $ convertRepeat i `shouldBe` o
+    mapM_ testCase cases
+
   describe "Convert.insertItem" $ do
     let t = "root"
     let item = emptyItem { unTaskID = "123" }
