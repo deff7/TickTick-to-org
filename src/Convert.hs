@@ -2,17 +2,19 @@
 
 module Convert where
 
-import Text.Pandoc
-import Text.Pandoc.Builder
-import qualified Data.Text as T
+import           Data.Function (on)
 import qualified Data.HashMap.Strict as M
+import           Data.List.Split (splitOn)
 import qualified Data.Sequence as S
+import           Data.Sort (sortBy)
+import qualified Data.Text as T
+import           Data.Time (UTCTime)
+import           Data.Time.Format (formatTime, defaultTimeLocale)
 import qualified Data.Vector as V
-import Data.Sort (sortBy)
-import Data.Function (on)
-import Data.List.Split (splitOn)
+import           Text.Pandoc
+import           Text.Pandoc.Builder
 
-import Item
+import           Item
 
 
 data Node = Leaf Int Item
@@ -43,6 +45,9 @@ itemsToTree = V.foldl (\n it -> insertItem n it (itemPath it)) (Node 0 "*" M.emp
 convertContent :: String -> Blocks
 convertContent = mconcat . map (para . text . T.pack) . splitOn "\r"
 
+convertScheduled :: UTCTime -> Blocks
+convertScheduled = para . text . T.pack . formatTime defaultTimeLocale "SCHEDULED: <%Y-%m-%d %a>"
+
 treeToPandoc :: Node -> Pandoc
 treeToPandoc root = setTitle "Root" $ doc $ go root
   where
@@ -52,7 +57,7 @@ treeToPandoc root = setTitle "Root" $ doc $ go root
         attrs = ("", if unStatus it == Normal then ["todo", "TODO"] else ["done", "DONE"], [])
         prefix = if unStatus it == Normal then "TODO " else "DONE "
         txt = text $ prefix <> (T.pack $ trimSpace $ unTitle it)
-        scheduled = maybe mempty (\dt -> para $ str "SCHEDULED") (unDueDate it)
+        scheduled = maybe mempty convertScheduled (unDueDate it)
         contents = convertContent $ unContent it
     go (Node lvl title hm) = hdr <> next
       where
