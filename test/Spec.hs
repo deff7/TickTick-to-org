@@ -23,6 +23,7 @@ emptyItem = Item { unFolderName = Nothing
                  , unColumnName = Nothing
                  , unTaskID = ""
                  , unChildTasks = []
+                 , unStatus = Normal
                  }
 
 main :: IO ()
@@ -34,23 +35,23 @@ main = hspec $ do
 
     context "with empty path" $ do
       it "inserts item to leaf empty hash map" $ do
-        insertItem (Node t M.empty) item [] `shouldBe`
-          (Node t $ M.singleton "123" (Leaf item))
+        insertItem (Node 1 t M.empty) item [] `shouldBe`
+          (Node 1 t $ M.singleton "123" (Leaf 2 item))
       it "inserts item to leaf hash map" $ do
-        insertItem (Node t $ M.singleton "234" (Leaf item')) item [] `shouldBe`
-          (Node t $ M.fromList [("123", Leaf item), ("234", Leaf item')])
+        insertItem (Node 1 t $ M.singleton "234" (Leaf 2 item')) item [] `shouldBe`
+          (Node 1 t $ M.fromList [("123", Leaf 2 item), ("234", Leaf 2 item')])
 
     context "with multiple parts in path" $ do
       context "with empty node" $ do
         it "constructs new nodes along the way" $ do
-          insertItem (Node t M.empty) item ["foo", "bar"] `shouldBe`
-            (Node t $ M.singleton "foo" (Node "foo" $ M.singleton "bar" (Node "bar" $ M.singleton "123" (Leaf item))))
+          insertItem (Node 1 t M.empty) item ["foo", "bar"] `shouldBe`
+            (Node 1 t $ M.singleton "foo" (Node 2 "foo" $ M.singleton "bar" (Node 3 "bar" $ M.singleton "123" (Leaf 4 item))))
       context "with non-empty node" $ do
-        let want = Node t $ M.singleton "foo" (Node "foo" $ M.singleton "bar" (Node "bar" $ M.fromList [("123", Leaf item), ("234", Leaf item')]))
+        let want = Node 1 t $ M.singleton "foo" (Node 2 "foo" $ M.singleton "bar" (Node 3 "bar" $ M.fromList [("123", Leaf 4 item), ("234", Leaf 4 item')]))
         let root' = want
 
         it "modifies hashmaps along the way" $ do
-          let root = Node t $ M.singleton "foo" (Node "foo" $ M.singleton "bar" (Node "bar" $ M.singleton "123" (Leaf item)))
+          let root = Node 1 t $ M.singleton "foo" (Node 2 "foo" $ M.singleton "bar" (Node 3 "bar" $ M.singleton "123" (Leaf 4 item)))
 
           let got = insertItem root item' ["foo", "bar"]
 
@@ -60,5 +61,5 @@ main = hspec $ do
           let item'' = emptyItem { unTaskID = "345" }
           let got' = insertItem root' item'' ["foo", "baz"]
 
-          got' `shouldBe` (Node t $ M.singleton "foo" (Node "foo" $ M.fromList [("bar", (Node "bar" $ M.fromList [("123", Leaf item), ("234", Leaf item')]))
-                                                                               ,("baz", (Node "baz" $ M.singleton "345" (Leaf item'')))]))
+          got' `shouldBe` (Node 1 t $ M.singleton "foo" (Node 2 "foo" $ M.fromList [("bar", (Node 3 "bar" $ M.fromList [("123", Leaf 4 item), ("234", Leaf 4 item')]))
+                                                                               ,("baz", (Node 3 "baz" $ M.singleton "345" (Leaf 4 item'')))]))
